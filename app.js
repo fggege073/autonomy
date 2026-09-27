@@ -15,7 +15,7 @@ tesla:{title:'테슬라 FSD 작동방식',subtitle:'Pure Vision → 3D 공간 �
 nvidia:{title:'엔비디아 자율주행 작동방식',subtitle:'하드웨어와 소프트웨어를 연결하는 NVIDIA DRIVE 플랫폼',badge:'PLATFORM & FUSION',className:'three',cards:[['⌖','Hyperion','레퍼런스 아키텍처','멀티센서 지원'],['▱','Dual Stack','모듈형 + End-to-End','이중 스택 구조'],['▧','DRIVE AGX','Thor / Orin','NVIDIA DRIVE 컴퓨팅 플랫폼']]},
 others:{title:'타 자동차 회사 작동방식',subtitle:'센서 퓨전과 HD Map을 중심으로 소개한 기업별 사례',badge:'SENSOR FUSION / HD MAP',className:'others',cards:[['⌖','Waymo','L4 로보택시','센서 퓨전 · HD Map'],['◇','Mercedes-Benz','L3 DRIVE PILOT','고속도로 조건부'],['◎','GM','Super Cruise','DMS · HD Map'],['▱','현대자동차','HDA 계열','센서 퓨전']]}
 };
-function renderArchitecture(key){const a=architectures[key];$('#architecture-content').innerHTML=`<div class="arch-intro"><div><h3>${a.title}</h3><p>${a.subtitle}</p></div><span>${a.badge}</span></div><div class="flow-grid ${a.className||''}">${a.cards.map(([icon,title,description,note],i)=>`<article class="panel flow-card"><small>0${i+1} / ${key==='others'?'COMPANY':'SYSTEM'}</small><span class="icon" aria-hidden="true">${icon}</span><h4>${title}</h4><p>${description}</p><div class="flow-foot">${note}</div></article>`).join('')}</div>`;selected($$('[data-company]'),b=>b.dataset.company===key);}
+function renderArchitecture(key){const a=architectures[key];$('#architecture-content').innerHTML=`<div class="arch-intro"><div><h3>${a.title}</h3><p>${a.subtitle}</p></div><span>${a.badge}</span></div><div class="flow-grid ${a.className||''}">${a.cards.map(([icon,title,description,note],i)=>`<article class="panel flow-card"><small>0${i+1} / ${key==='others'?'COMPANY':'SYSTEM'}</small><span class="icon" aria-hidden="true">${icon}</span><h4>${title}</h4><p>${description}</p><div class="flow-foot">${note}</div></article>`).join('')}</div>`;selected($$('[data-company]'),b=>b.dataset.company===key);queueFlowAnimation();}
 $$('[data-company]').forEach(b=>b.addEventListener('click',()=>renderArchitecture(b.dataset.company)));renderArchitecture('tesla');
 const liabilities=['100% 운전자 책임','시스템 책임 원칙 / TOR 미응답 시 운전자','100% 제조사 & 운영사 책임'];
 $$('[data-liability]').forEach(b=>b.addEventListener('click',()=>{selected($$('[data-liability]'),el=>el===b);$('#liability-description').innerHTML=`<strong>${liabilities[Number(b.dataset.liability)]}</strong><p>${b.textContent}</p>`;}));
@@ -24,3 +24,29 @@ menu.addEventListener('click',()=>{const open=$('#nav').classList.toggle('open')
 function updateProgress(){const height=document.documentElement.scrollHeight-innerHeight;$('.progress').style.width=`${height>0?scrollY/height*100:0}%`;}
 window.addEventListener('scroll',updateProgress,{passive:true});window.addEventListener('resize',updateProgress);updateProgress();
 const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting)$$('#nav a').forEach(a=>a.classList.toggle('current',a.hash===`#${entry.target.id}`));});},{rootMargin:'-15% 0px -55% 0px'});$$('main>section[id]').forEach(s=>observer.observe(s));
+
+// Play once on entering view. Never hide content while waiting for an observer.
+function queueFlowAnimation() {
+  const grid = document.querySelector('#architecture-content .flow-grid');
+  if (!grid || grid.classList.contains('others') || !('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  grid.querySelectorAll('.flow-card').forEach((card, index) => card.style.setProperty('--flow-index', index));
+  const flowObserver = new IntersectionObserver(entries => {
+    if (!grid.isConnected) { flowObserver.disconnect(); return; }
+    if (entries.some(entry => entry.isIntersecting)) {
+      grid.classList.add('flow-playing');
+      flowObserver.disconnect();
+    }
+  }, { threshold: .2 });
+  flowObserver.observe(grid);
+}
+if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('reveal-enter');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: .12 });
+  document.querySelectorAll('.section .heading, .standard-grid, .callout, .table-wrap, .reg-card, .liability, .marine, .team-card').forEach(element => revealObserver.observe(element));
+}
