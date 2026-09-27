@@ -1,8 +1,8 @@
-﻿const $ = s => document.querySelector(s);
+const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const levels = {
-car: [['L0','비자동화','운전자가 주행을 수행하는 단계입니다.','SAE J3016 · 자동차 자동화 기준'],['L1','운전자 지원','운전자의 주행을 보조하는 단계입니다.','SAE J3016 · 자동차 자동화 기준'],['L2','부분 자동화','PDF는 L2와 고도화 L2+를 구분합니다. L2+는 공식 등급이 아닙니다.','L2+ · DMS 기반 핸즈프리 보조 / 원문: 운전자 책임 100%'],['L3','조건부 자동화','조건부 자동화 단계로, 원문에서는 제어권 전환 요청(TOR)에 대한 운전자 응답을 함께 다룹니다.','원문: 시스템 책임 원칙 / TOR 미응답 시 운전자'],['L4','고도 자동화','PDF에서 Waymo의 L4 로보택시 사례와 연결되는 단계입니다.','사고 책임 설명은 규제와 책임 섹션 참고'],['L5','완전 자동화','자동차 자동화 단계에서 완전 자동화로 소개됩니다.','SAE J3016 · PDF 3쪽']],
-ship: [['Degree 1','승선지원','PDF 선박 자동화 도표의 첫 번째 단계입니다.','IMO MASS · PDF 원문 표기'],['Degree 2','승선지원','원본 도표에는 Degree 2가 두 번 등장하며, 첫 번째는 승선지원으로 표기되어 있습니다.','원본의 중복 표기를 생략하지 않고 보존했습니다.'],['Degree 2','원격제어','원본 도표에 표시된 두 번째 Degree 2 단계입니다.','IMO MASS · 원격제어'],['Degree 3','무인원격','선박의 무인 원격 운항 단계로 소개됩니다.','IMO MASS · PDF 원문 표기'],['Degree 4','완전자율','선박의 완전 자율 단계로 소개됩니다.','IMO MASS · PDF 원문 표기']]
+car: [['L0','비자동화','운전자가 주행을 수행하는 단계입니다.','SAE J3016 · 자동차 자동화 기준'],['L1','운전자 지원','운전자의 주행을 보조하는 단계입니다.','SAE J3016 · 자동차 자동화 기준'],['L2','부분 자동화','L2는 부분 자동화 단계입니다. 고도화 L2+는 공식 등급이 아닙니다.','L2+ · DMS 기반 핸즈프리 보조 / 운전자 책임 100%'],['L3','조건부 자동화','조건부 자동화 · 제어권 전환 요청(TOR)에 대한 운전자 응답','시스템 책임 원칙 / TOR 미응답 시 운전자'],['L4','고도 자동화','고도 자동화 단계 · Waymo L4 로보택시','SAE J3016 · 고도 자동화'],['L5','완전 자동화','자동차 자동화 단계에서 완전 자동화로 소개됩니다.','SAE J3016 · 완전 자동화']],
+ship: [['Degree 1','승선지원','선박 자동화 · 승선지원','IMO MASS'],['Degree 2','승선지원','선박 자동화 · 승선지원','IMO MASS'],['Degree 2','원격제어','선박 자동화 · 원격제어','IMO MASS · 원격제어'],['Degree 3','무인원격','선박의 무인 원격 운항 단계로 소개됩니다.','IMO MASS'],['Degree 4','완전자율','선박의 완전 자율 단계로 소개됩니다.','IMO MASS']]
 };
 let domain='car';
 function selected(buttons, predicate){buttons.forEach((b,i)=>{const active=predicate(b,i);b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});}
@@ -11,24 +11,14 @@ function renderLevels(key){domain=key;$('#level-buttons').innerHTML=levels[key].
 $$('[data-domain]').forEach(b=>b.addEventListener('click',()=>renderLevels(b.dataset.domain)));
 $('#level-buttons').addEventListener('click',e=>{const b=e.target.closest('button');if(b)selectLevel(Number(b.dataset.level));});renderLevels('car');
 const architectures={
-tesla:{title:'테슬라 FSD 작동방식',subtitle:'Pure Vision → 3D 공간 표현 → 차량 제어 → 데이터 학습',badge:'VISION & END-TO-END AI',cards:[['◎','Pure Vision','카메라 중심 인식','원본 그림: 센서·HD Map 배제 표시'],['▦','Occupancy Network','3D 공간 표현','주변 공간을 입체적으로 표현'],['⌘','End-to-End AI','비전 입력 → 차량 제어','종단간 AI'],['⟳','수직 통합 데이터 엔진','데이터 수집 → AI 학습 → 배포','반복되는 데이터 학습 순환']]},
+tesla:{title:'테슬라 FSD 작동방식',subtitle:'Pure Vision → 3D 공간 표현 → 차량 제어 → 데이터 학습',badge:'VISION & END-TO-END AI',cards:[['◎','Pure Vision','카메라 중심 인식','카메라 중심 · HD Map 배제'],['▦','Occupancy Network','3D 공간 표현','주변 공간을 입체적으로 표현'],['⌘','End-to-End AI','비전 입력 → 차량 제어','종단간 AI'],['⟳','수직 통합 데이터 엔진','데이터 수집 → AI 학습 → 배포','반복되는 데이터 학습 순환']]},
 nvidia:{title:'엔비디아 자율주행 작동방식',subtitle:'하드웨어와 소프트웨어를 연결하는 NVIDIA DRIVE 플랫폼',badge:'PLATFORM & FUSION',className:'three',cards:[['⌖','Hyperion','레퍼런스 아키텍처','멀티센서 지원'],['▱','Dual Stack','모듈형 + End-to-End','이중 스택 구조'],['▧','DRIVE AGX','Thor / Orin','NVIDIA DRIVE 컴퓨팅 플랫폼']]},
 others:{title:'타 자동차 회사 작동방식',subtitle:'센서 퓨전과 HD Map을 중심으로 소개한 기업별 사례',badge:'SENSOR FUSION / HD MAP',className:'others',cards:[['⌖','Waymo','L4 로보택시','센서 퓨전 · HD Map'],['◇','Mercedes-Benz','L3 DRIVE PILOT','고속도로 조건부'],['◎','GM','Super Cruise','DMS · HD Map'],['▱','현대자동차','HDA 계열','센서 퓨전']]}
 };
 function renderArchitecture(key){const a=architectures[key];$('#architecture-content').innerHTML=`<div class="arch-intro"><div><h3>${a.title}</h3><p>${a.subtitle}</p></div><span>${a.badge}</span></div><div class="flow-grid ${a.className||''}">${a.cards.map(([icon,title,description,note],i)=>`<article class="panel flow-card"><small>0${i+1} / ${key==='others'?'COMPANY':'SYSTEM'}</small><span class="icon" aria-hidden="true">${icon}</span><h4>${title}</h4><p>${description}</p><div class="flow-foot">${note}</div></article>`).join('')}</div>`;selected($$('[data-company]'),b=>b.dataset.company===key);}
 $$('[data-company]').forEach(b=>b.addEventListener('click',()=>renderArchitecture(b.dataset.company)));renderArchitecture('tesla');
 const liabilities=['100% 운전자 책임','시스템 책임 원칙 / TOR 미응답 시 운전자','100% 제조사 & 운영사 책임'];
-$$('[data-liability]').forEach(b=>b.addEventListener('click',()=>{selected($$('[data-liability]'),el=>el===b);$('#liability-description').innerHTML=`<strong>${liabilities[Number(b.dataset.liability)]}</strong><p>PDF 원문 표현 · ${b.textContent}</p>`;}));
-const slideTitles=['자율주행 및 자율운항','발표 구성과 핵심 주제','자동차·선박 자동화 단계','테슬라 FSD 작동방식','엔비디아 자율주행 작동방식','타 자동차 회사 작동방식','기업별 기술 비교표','현재 자율주행 관련 법규','사고 책임과 선박 법규','팀원 소개 및 QR 코드'];
-const slidePath=i=>`assets/slides/page-${String(i+1).padStart(2,'0')}.webp`;
-$('#slide-grid').innerHTML=slideTitles.map((title,i)=>`<button class="slide-card" data-slide="${i}" aria-label="${i+1}쪽 ${title} 크게 보기"><img src="${slidePath(i)}" alt="${title} 원본 슬라이드" loading="lazy" width="1400" height="788"><span><b>${String(i+1).padStart(2,'0')}</b>${title}</span></button>`).join('');
-let currentSlide=0;const dialog=$('#slide-dialog');
-function showSlide(i){currentSlide=i;$('#slide-image').src=slidePath(i);$('#slide-image').alt=`${i+1}쪽: ${slideTitles[i]}`;$('#slide-counter').textContent=`${String(i+1).padStart(2,'0')} / 10 — ${slideTitles[i]}`;$('#previous-slide').disabled=i===0;$('#next-slide').disabled=i===9;}
-$$('[data-slide]').forEach(b=>b.addEventListener('click',()=>{showSlide(Number(b.dataset.slide));dialog.showModal();document.body.style.overflow='hidden';}));
-$('#close-slide').addEventListener('click',()=>dialog.close());dialog.addEventListener('close',()=>document.body.style.overflow='');
-dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();}});
-$('#previous-slide').addEventListener('click',()=>{if(currentSlide>0)showSlide(currentSlide-1);});$('#next-slide').addEventListener('click',()=>{if(currentSlide<9)showSlide(currentSlide+1);});
-dialog.addEventListener('keydown',e=>{if(e.key==='ArrowRight'&&currentSlide<9){e.preventDefault();showSlide(currentSlide+1);}if(e.key==='ArrowLeft'&&currentSlide>0){e.preventDefault();showSlide(currentSlide-1);}});
+$$('[data-liability]').forEach(b=>b.addEventListener('click',()=>{selected($$('[data-liability]'),el=>el===b);$('#liability-description').innerHTML=`<strong>${liabilities[Number(b.dataset.liability)]}</strong><p>${b.textContent}</p>`;}));
 const team=[['김준한','Data & Architecture','DATA','▧','https://kimjunhan52.github.io/'],['주동건','Algorithm & Control','CONTROL','⌘','https://wnehdrjs-bot.github.io/'],['최강현','Sensor & Vision','VISION','◎','https://fggege073.github.io/'],['최민혁','Regulation & Policy','POLICY','◈','https://minhyeok03.github.io/']];
 $('#team-grid').innerHTML=team.map(([name,role,label,icon,url],i)=>`<a class="team-card" href="${url}" target="_blank" rel="noopener"><small>0${i+1} / ${label}</small><span class="icon" aria-hidden="true">${icon}</span><h3>${name} <span>↗</span></h3><p>${role}</p><span>개인 페이지 방문</span></a>`).join('');
 const menu=$('.menu');function closeMenu(){$('#nav').classList.remove('open');menu.setAttribute('aria-expanded','false');menu.setAttribute('aria-label','메뉴 열기');}
